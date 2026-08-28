@@ -1,4 +1,4 @@
-import { clients, recognition, certifications } from "@/lib/content";
+import { clients } from "@/lib/content";
 import { Container } from "@/components/ui/Container";
 import { cn } from "@/lib/cn";
 import { SpinStar } from "@/components/fx/Adornments";
@@ -24,14 +24,13 @@ function LogoChip({ name }: { name: string }) {
   );
 }
 
-/** Client logo wall + industry recognition + platform certifications.
+/** Client logo wall.
  *
  *  Shared with the service pages, so the section handle is parameterised the
  *  same way Work and Insights are. Defaults keep the homepage unchanged. */
 export function TrustStrip({
   id,
   label = "Trusted By",
-  credentials = true,
   compact = false,
 }: {
   id?: string;
@@ -40,10 +39,6 @@ export function TrustStrip({
    *  viewport with it: tighter padding and a single logo row instead of two,
    *  which is what actually makes it fit above the fold. */
   compact?: boolean;
-  /** The "Recognized by" and "Certified" panel. Kept on the homepage, dropped
-   *  on the service pages, where the strip only needs to establish trust in
-   *  passing rather than run to a second block of its own. */
-  credentials?: boolean;
 } = {}) {
   const half = Math.ceil(clients.length / 2);
   // One row carries every client when compact; two rows split them otherwise.
@@ -74,7 +69,15 @@ export function TrustStrip({
       {/* Logo marquee: one row when compact, two counter-rotating rows when not. */}
       <div className="space-y-4">
         <div className="relative overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)]">
-          <div className="animate-marquee flex w-max items-center gap-4 pr-4">
+          {/* Duration is set here rather than on .animate-marquee, which the
+              Voices section also uses. Compact packs every client into this one
+              row, so a cycle covers twice the chips a split row does and runs
+              visually twice as fast at the same duration — hence the longer
+              time here. */}
+          <div
+            className="animate-marquee flex w-max items-center gap-4 pr-4"
+            style={{ animationDuration: compact ? "45s" : "30s" }}
+          >
             {rowA.map((name, i) => (
               <LogoChip key={`a-${name}-${i}`} name={name} />
             ))}
@@ -95,41 +98,6 @@ export function TrustStrip({
         )}
       </div>
 
-      {/* Recognized by — aligned grid. Homepage only. */}
-      {credentials && (
-        <Container className="mt-16">
-          <div className="overflow-hidden rounded-2xl border border-line">
-            <div className="grid items-center gap-6 border-b border-line px-7 py-6 sm:grid-cols-[170px_1fr]">
-              <span className="text-xs font-semibold uppercase tracking-[0.25em] text-ash">
-                Recognized by
-              </span>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3 lg:grid-cols-6">
-                {recognition.map((r) => (
-                  <span
-                    key={r}
-                    className="font-display text-center text-sm font-bold text-fog transition-colors duration-300 hover:text-snow sm:text-base"
-                  >
-                    {r}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className="grid items-center gap-6 px-7 py-6 sm:grid-cols-[170px_1fr]">
-              <span className="text-xs font-semibold uppercase tracking-[0.25em] text-ash">
-                Certified
-              </span>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-4 lg:grid-cols-4">
-                {certifications.map((c) => (
-                  <span key={c} className="flex items-center justify-center gap-2 text-sm text-fog">
-                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />
-                    {c}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </Container>
-      )}
     </section>
   );
 }
